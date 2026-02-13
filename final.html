@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Be My Valentine?</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #FFB6C1, #FF69B4);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 40px 20px;
+      border-radius: 25px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 95%;
+      max-width: 450px;
+      min-height: 350px;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      font-size: 24px;
+      color: #FF1493;
+      text-shadow: 1.5px 1.5px 4px #000;
+    }
+
+    .buttons {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      z-index: 2;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.2s ease;
+      position: relative;
+      z-index: 2;
+    }
+
+    #yesBtn { background: #4CAF50; color: white; }
+    #noBtn { background: #ff4d4d; color: white; }
+
+    #messages {
+      font-size: 20px;
+      color: #FF1493;
+      margin-top: 20px;
+      display: none;
+      line-height: 1.5;
+      z-index: 3;
+    }
+
+    .heart {
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      background: pink;
+      transform: rotate(-45deg);
+      animation: float 4s linear infinite;
+      z-index: 0;
+    }
+    .heart::before,
+    .heart::after {
+      content: '';
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      background: pink;
+      border-radius: 50%;
+    }
+    .heart::before { top: -12.5px; left: 0; }
+    .heart::after { left: 12.5px; top: 0; }
+
+    @keyframes float {
+      0% { transform: translateY(0) rotate(-45deg); opacity: 1; }
+      100% { transform: translateY(-500px) rotate(-45deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <h1>Hi. I miss you. A lot. I know you miss me too. But tumi onek sad. I know things are not going very great for either of us. But should we really harm what we have for our fucked up lives or should we try to build ourselves together and save this beautiful thing? I know ami onek dull ekta manush but i do try. You know it. But i will change. You have to trust me a bit. Eishob day ami khub ekta palon kori na but still i would like to ask. Will you be my valentine? 💖</h1>
+    <div class="buttons">
+      <button id="yesBtn">Yes 😍</button>
+      <button id="noBtn">No 😢</button>
+    </div>
+    <div id="messages"></div>
+  </div>
+
+  <script>
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const messagesDiv = document.getElementById('messages');
+    const card = document.getElementById('card');
+
+    // Initialize music
+    const music = new Audio('love.mp3');
+    music.volume = 0.5;
+    music.loop = true;
+    let musicStarted = false;
+
+    let currentDistance = 100; // initial distance to move away
+
+    function moveNoButton(e){
+      const rect = noBtn.getBoundingClientRect();
+      const distanceX = e.clientX - (rect.left + rect.width/2);
+      const distanceY = e.clientY - (rect.top + rect.height/2);
+      const distance = Math.sqrt(distanceX*distanceX + distanceY*distanceY);
+
+      if(distance < currentDistance){
+        // Increase distance each time she tries to touch
+        currentDistance += 20;
+
+        // Calculate smooth movement
+        let moveX = (distanceX < 0 ? -1 : 1) * (currentDistance - distance);
+        let moveY = (distanceY < 0 ? -1 : 1) * (currentDistance - distance);
+        let newLeft = rect.left + moveX;
+        let newTop = rect.top + moveY;
+
+        // Keep button within screen bounds
+        newLeft = Math.min(window.innerWidth - rect.width - 10, Math.max(10, newLeft));
+        newTop = Math.min(window.innerHeight - rect.height - 10, Math.max(10, newTop));
+
+        // Smooth movement using CSS transition
+        noBtn.style.transition = 'all 0.3s ease';
+        noBtn.style.position = 'fixed';
+        noBtn.style.left = newLeft + 'px';
+        noBtn.style.top = newTop + 'px';
+        noBtn.style.zIndex = 9999;
+
+        // Play music when first touch
+        if(!musicStarted){
+          musicStarted = true;
+          music.play().catch(() => {
+            const startMusic = () => {
+              music.play();
+              document.removeEventListener('touchstart', startMusic);
+            };
+            document.addEventListener('touchstart', startMusic, { once: true });
+          });
+        }
+      }
+    }
+
+    document.addEventListener('mousemove', moveNoButton);
+    document.addEventListener('touchmove', moveNoButton);
+
+    // Yes button messages
+    const messages = [
+      "eibar unblock koro plss T_T",
+      "will send you nudess :*",
+    ];
+    yesBtn.addEventListener('click', () => {
+      messagesDiv.style.display = 'block';
+      let i = 0;
+      messagesDiv.innerText = messages[i];
+      const interval = setInterval(() => {
+        i++;
+        if(i < messages.length){
+          messagesDiv.innerText = messages[i];
+        } else {
+          clearInterval(interval);
+        }
+      }, 2000);
+    });
+
+    // Hearts inside the card
+    function createHeart(){
+      const heart = document.createElement('div');
+      heart.className = 'heart';
+      heart.style.left = Math.random() * card.clientWidth + 'px';
+      heart.style.top = Math.random() * card.clientHeight + 'px';
+      heart.style.animationDuration = 3 + Math.random() * 2 + 's';
+      card.appendChild(heart);
+      setTimeout(()=> heart.remove(), 4000);
+    }
+    setInterval(createHeart, 200);
+  </script>
+</body>
+</html>
